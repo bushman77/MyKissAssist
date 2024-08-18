@@ -15,8 +15,10 @@ wine LaunchPad.exe # load, login, set window size, etc then exit
 # I've noticed that adjusting the game settings from the Launcher doesn't stick. Meaning my eqclient.ini can be manually changed and if I open the Launcher Game Settings it will overwrite. So we'll manually update
 nano eqclient.ini
 
-MipMapping=FALSE # unnecessary with modern gear
-LoadSocialAnimations=FALSE # personal pref, I'm cooking a laptop so I take cuts where I can get them
+MipMapping=FALSE 
+## unnecessary with modern gear
+LoadSocialAnimations=FALSE 
+## personal pref, I'm cooking a laptop so I take cuts where I can get them
 UseD3DTextureCompression=FALSE # DX11 changes depreciated this client feature
 TextureCache=FALSE # DX11 changes depreciated this client feature
 
