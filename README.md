@@ -15,10 +15,14 @@ wine LaunchPad.exe # load, login, set window size, etc then exit
 # I've noticed that adjusting the game settings from the Launcher doesn't stick. Meaning my eqclient.ini can be manually changed and if I open the Launcher Game Settings it will overwrite. So we'll manually update
 nano eqclient.ini
 
-MipMapping=FALSE # unnecessary with modern gear
-LoadSocialAnimations=FALSE # personal pref, I'm cooking a laptop so I take cuts where I can get them
-UseD3DTextureCompression=FALSE # DX11 changes depreciated this client feature
-TextureCache=FALSE # DX11 changes depreciated this client feature
+MipMapping=FALSE 
+# unnecessary with modern gear
+LoadSocialAnimations=FALSE 
+# personal pref, I'm cooking a laptop so I take cuts where I can get them
+UseD3DTextureCompression=FALSE 
+# DX11 changes depreciated this client feature
+TextureCache=FALSE 
+# DX11 changes depreciated this client feature
 
 ## hot topic is VertexShaders TRUE|FALSE, I'm not exactly sure. I have it as TRUE so I'm open to debate on this with the DX11/64bit client
 ## if I don't have Allow Pixel Shaders 2.0 enable in game, it's a slideshow in PoK or Kunark tree graphics
