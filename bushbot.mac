@@ -1,8 +1,52 @@
-#turbo
-Sub Main
-   :Loop
-     
-      /delay 1
-   /goto :Loop
+#turbo 80
+
+ /varset follow 0 
+
+sub StopFollowing
+  /delay 2
+  /afollow off
+  /nav stop
 /return
 
+#event OPENDOOR "#*# open door"
+sub Event_OPENDOOR(Line,player,t)
+  /call StopFollowing
+  /squelch /doortarget
+  /squelch /face door
+  /delay 2
+  /if (!${Switch.Open}) {
+    /keypress u hold
+    /delay 2
+    /keypress u
+  }
+/return
+
+#event Attack "<#1#> attack #2#"
+sub Event_Attack(Line,player,t)
+   /call StopFollowing
+   /targ ${t}
+   :AttackLoop
+      /doevents
+      /if (${Me.Combat}==FALSE) /keypress q
+      /if (${Target.Distance}>10) /keypress w hold
+      /if (${Target.Distance}<10) /keypress w 
+      /face fast
+      /delay 1
+   /if (${Target.ID} and ${Me.XTarget} > 0) /goto :AttackLoop
+/return
+
+#event Follow "<#1#> follow #2#"
+sub Event_Follow(Line,m,member)
+    /afollow off
+    /nav stop
+    /timed 5 
+    /afollow spawn ${member}
+/return
+
+Sub Main
+  :Loop
+    /doevents
+    | /if (${follow} == 0) /call  
+    /delay 1   
+  /goto :Loop
+/return
