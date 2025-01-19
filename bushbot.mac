@@ -1,52 +1,32 @@
-#turbo 80
+local mq = require('mq')
 
- /varset follow 0 
+local Me = mq.TLO.Me
 
-sub StopFollowing
-  /delay 2
-  /afollow off
-  /nav stop
-/return
+local function attack(line, arg1)
+  mq.cmdf('/multiline ; /afollow off;/nav stop;/target %s;/delay 5;/attack on;/mac follow', arg1)
 
-#event OPENDOOR "#*# open door"
-sub Event_OPENDOOR(Line,player,t)
-  /call StopFollowing
-  /squelch /doortarget
-  /squelch /face door
-  /delay 2
-  /if (!${Switch.Open}) {
-    /keypress u hold
-    /delay 2
-    /keypress u
-  }
-/return
+-- keep fighting untill all targets are dead
+-- while(Me.XTarget() >= 1 )
+-- do
+-- --   -- keep listening to events that happen
+--   mq.doevents()
+--   mq.delay(1)
+--   print('poppopo')
+-- end
+end
+local function follow(line, arg1)
+  mq.cmdf('/multiline ; /afollow off;/nav stop;/timed 5 /afollow spawn %s', arg1)
+end
+local function stop(line, arg1)
+  mq.cmdf('/multiline ; /afollow off;/nav stop %s', arg1)
+end
 
-#event Attack "<#1#> attack #2#"
-sub Event_Attack(Line,player,t)
-   /call StopFollowing
-   /targ ${t}
-   :AttackLoop
-      /doevents
-      /if (${Me.Combat}==FALSE) /keypress q
-      /if (${Target.Distance}>10) /keypress w hold
-      /if (${Target.Distance}<10) /keypress w 
-      /face fast
-      /delay 1
-   /if (${Target.ID} and ${Me.XTarget} > 0) /goto :AttackLoop
-/return
+mq.event('attack', '<#*#> attack #1#', attack)
+mq.event('follow', '<#*#> follow #1#', follow)
+mq.event('stop', '<#*#> stopfollow #1#', stop)
 
-#event Follow "<#1#> follow #2#"
-sub Event_Follow(Line,m,member)
-    /afollow off
-    /nav stop
-    /timed 5 
-    /afollow spawn ${member}
-/return
-
-Sub Main
-  :Loop
-    /doevents
-    | /if (${follow} == 0) /call  
-    /delay 1   
-  /goto :Loop
-/return
+while not terminate
+do
+    mq.doevents()
+    mq.delay(1) -- just yield the frame every loop
+end
