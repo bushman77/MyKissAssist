@@ -1,32 +1,50 @@
 local mq = require('mq')
 
 local Me = mq.TLO.Me
+local Target = mq.TLO.Target
+local state = {
+  follow = 0,
+}
 
-local function attack(line, arg1)
-  mq.cmdf('/multiline ; /afollow off;/nav stop;/target %s;/delay 5;/attack on;/mac follow', arg1)
 
--- keep fighting untill all targets are dead
--- while(Me.XTarget() >= 1 )
--- do
--- --   -- keep listening to events that happen
---   mq.doevents()
---   mq.delay(1)
---   print('poppopo')
--- end
-end
+local function attack(line, npc) mq.cmdf("/multiline ; /targ %s ; /mac follow ; /attack on", npc) end
+
 local function follow(line, arg1)
-  mq.cmdf('/multiline ; /afollow off;/nav stop;/timed 5 /afollow spawn %s', arg1)
+  --print(arg1)
+  --if(Me.Combat()) then mq.cmd('/attack off') end
+  mq.cmdf("/multiline ; /targ Bushman ; /mac follow")
+  --mq.cmdf('/multiline ; /afollow off;/nav stop;/timed 5 /afollow spawn %s', arg1)
 end
+
+local function nexttarget(poo)
+  mq.cmd("/bc aquiring next target")
+  mq.cmd("/xtarg 1")
+  mq.cmd("/attack on")
+  mq.cmd("/mac follow")
+end
+
 local function stop(line, arg1)
   mq.cmdf('/multiline ; /afollow off;/nav stop %s', arg1)
 end
+local function groupchat(line, arg1, arg2)
+  local chat = arg1 .. ' tells the group ' .. arg2
+  mq.cmdf('/bc %s', chat)
+end
+local function guildchat(line, arg1, arg2)
+  local chat = arg1 .. ' tells the guild ' .. arg2
+  mq.cmdf('/bc %s', chat)
+end
 
 mq.event('attack', '<#*#> attack #1#', attack)
-mq.event('follow', '<#*#> follow #1#', follow)
+mq.event('follow', '<#1#> follow', follow)
 mq.event('stop', '<#*#> stopfollow #1#', stop)
+mq.event('groupchat', "#1# tells the group, '#2#'", groupchat)
+mq.event('guildchat', "#1# tells the guild, '#2#'", guildchat)
+
 
 while not terminate
 do
     mq.doevents()
+    if(Me.XTarget()>=1 and Target.ID() and not Me.Combat()) then nexttarget("poo") end
     mq.delay(1) -- just yield the frame every loop
 end
