@@ -11,11 +11,12 @@ local Me     = mq.TLO.Me
 local Target = mq.TLO.Target
 local Spawn  = mq.TLO.Spawn
 
+local terminate = false
+local isOpen, shouldDraw = true, true
+
 mq.cmd("/SetWinTitle ${Me.Name}.${EverQuest.Server} (Lvl:${Me.Level} ${Me.Class})")
 
 local function attack(line, npc) mq.cmdf("/multiline ; /targ %s ; /mac follow ; /attack on", npc) end
-
-
 local function nexttarget(poo)
   mq.cmd("/bc aquiring next target")
   mq.cmd("/xtarg 1")
@@ -23,7 +24,9 @@ local function nexttarget(poo)
   mq.cmd("/mac follow")
 end
 
+-- ------------------
 -- movement functions
+-- ------------------
 local function follow(line, player)
   id = Spawn(player).ID
   mq.cmdf('/bc following %s', id) 
@@ -31,7 +34,9 @@ local function follow(line, player)
 end
 local function stop(line, player) mq.cmd('/multiline ; /bc stopping ; /afollow off;/nav stop') end
 
+-- --------------------
 -- chat relay functions
+-- --------------------
 local function groupchat(line, arg1, arg2)
   local chat = arg1 .. ' tells the group ' .. arg2
   mq.cmdf('/bc %s', chat)
@@ -41,8 +46,29 @@ local function guildchat(line, arg1, arg2)
   mq.cmdf('/bc %s', chat)
 end
 
+-- --------------------
+-- targetting functions
+-- --------------------
 local function xtargets(line, xtarg)
   mq.cmd("/bc adding to xtargets")
+end
+
+-- MASTER GUI	
+ local function updateImGui()
+    -- Don't draw the UI if the UI was closed by pressing the X button
+    if not isOpen then return end
+
+    -- isOpen will be set false if the X button is pressed on the window
+    -- shouldDraw will generally always be true unless the window is collapsed
+    isOpen, shouldDraw = ImGui.Begin('UI Sample 1', isOpen)
+    -- Only draw the window contents if shouldDraw is true
+    if shouldDraw then
+        if ImGui.Button('X') then
+            terminate = true
+        end
+    end
+    -- Always call ImGui.End if begin was called
+    ImGui.End()
 end
 
 mq.event('attack', '<#*#> attack #1#', attack)
@@ -52,11 +78,13 @@ mq.event('groupchat', "#1# tells the group, '#2#'", groupchat)
 mq.event('guildchat', "#1# tells the guild, '#2#'", guildchat)
 mq.event('xtargets', "<#*#> add xtarget #1#", xtargets)
 
+mq.imgui.init('uisample1', updateImGui)
+
 while not terminate
 do
     mq.doevents()
     if(role == "master") then
-      print("MASTER") 
+      --print("MASTER") 
     else
       if(Me.XTarget()>=1 and Target.ID() and not Me.Combat()) then
         nexttarget("poo") 
