@@ -1,16 +1,20 @@
 local mq = require('mq')
+local actors = require('actors')
 
+-- capture global arguments and map them to table
+local args = {...}
+-- assign each element of global table to a human readable variable
+local role = args[1]
+
+-- TLO mapped
 local Me     = mq.TLO.Me
 local Target = mq.TLO.Target
 local Spawn  = mq.TLO.Spawn
 
+mq.cmd("/SetWinTitle ${Me.Name}.${EverQuest.Server} (Lvl:${Me.Level} ${Me.Class})")
+
 local function attack(line, npc) mq.cmdf("/multiline ; /targ %s ; /mac follow ; /attack on", npc) end
 
-local function follow(line, player)
-  id = Spawn(player).ID
-  mq.cmdf('/bc following %s', id) 
-  mq.cmdf("/multiline ; /afollow off ; /nav stop ; /timed 5 /afollow spawn %s", id)
-end
 
 local function nexttarget(poo)
   mq.cmd("/bc aquiring next target")
@@ -19,10 +23,15 @@ local function nexttarget(poo)
   mq.cmd("/mac follow")
 end
 
-local function stop(line, player)
-  mq.cmd("/bc stopping")
-  mq.cmd('/multiline ; /afollow off;/nav stop')
+-- movement functions
+local function follow(line, player)
+  id = Spawn(player).ID
+  mq.cmdf('/bc following %s', id) 
+  mq.cmdf("/multiline ; /keypress esc ; /attack off ; /afollow off ; /nav stop ; /timed 5 /afollow spawn %s", id)
 end
+local function stop(line, player) mq.cmd('/multiline ; /bc stopping ; /afollow off;/nav stop') end
+
+-- chat relay functions
 local function groupchat(line, arg1, arg2)
   local chat = arg1 .. ' tells the group ' .. arg2
   mq.cmdf('/bc %s', chat)
@@ -32,16 +41,26 @@ local function guildchat(line, arg1, arg2)
   mq.cmdf('/bc %s', chat)
 end
 
+local function xtargets(line, xtarg)
+  mq.cmd("/bc adding to xtargets")
+end
+
 mq.event('attack', '<#*#> attack #1#', attack)
 mq.event('follow', '<#1#> follow', follow)
 mq.event('stop', '<#1#> stop', stop)
 mq.event('groupchat', "#1# tells the group, '#2#'", groupchat)
 mq.event('guildchat', "#1# tells the guild, '#2#'", guildchat)
-
+mq.event('xtargets', "<#*#> add xtarget #1#", xtargets)
 
 while not terminate
 do
     mq.doevents()
-    if(Me.XTarget()>=1 and Target.ID() and not Me.Combat()) then nexttarget("poo") end
+    if(role == "master") then
+      print("MASTER") 
+    else
+      if(Me.XTarget()>=1 and Target.ID() and not Me.Combat()) then
+        nexttarget("poo") 
+      end
+    end
     mq.delay(1) -- just yield the frame every loop
 end
